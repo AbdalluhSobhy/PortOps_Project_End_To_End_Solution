@@ -1,72 +1,52 @@
-## Power BI Dashboard Design
+# Power BI DAX Measures Documentation
 
-The Power BI report was designed with usability and navigation in mind, targeting operations management users who need quick access to key operational KPIs and performance metrics.
+This document provides a complete reference for all DAX calculations used in the Terminal Operations Dashboard. Measures are organized by functional area for easier maintenance and onboarding.
 
-### Report Structure
+---
 
-The report consists of four pages:
+## 1. Core Throughput KPIs
 
-1. **Landing Page**
+| Measure | Description |
+|---------|-------------|
+| **Total Container Moves** | Primary operational throughput KPI |
+| **Average Daily Moves** | Throughput normalized by operating days |
 
-   * Serves as the report home page.
-   * Contains page navigators that allow users to quickly move between report sections.
-   * Provides a clean entry point and improves the overall user experience.
+### Total Container Moves
 
-2. **Operations Overview**
+Counts all records in the container movement fact table.
 
-   * Displays high-level operational KPIs such as container moves, crane cycle time, berth occupancy, and gate transaction volume.
-   * Includes trend analysis and operational breakdowns by terminal and shift.
-
-3. **Gate Performance**
-
-   * Focuses on gate activity, gate-in versus gate-out analysis, truck turnaround times, and customer gate performance.
-
-4. **Customer & Vessel Performance**
-
-   * Highlights top customers, year-over-year performance, vessel efficiency metrics, and SCD Type 2 historical customer analysis.
-
-### Visual Design
-
-The report follows a consistent visual design across all pages to improve readability and maintain a professional appearance.
-
-The color palette was inspired by the company's logo to align the dashboard with the organization's visual identity. Primary and secondary colors from the logo were applied consistently across KPIs, charts, navigation elements, and page headers to create a unified reporting experience.
-
-### User Experience
-
-To improve report usability and navigation, a set of persistent navigation icons was implemented across all report pages:
-
-* **Home Icon**: Returns the user directly to the Landing Page from any report page.
-* **Menu Icon**: Opens a navigation panel containing links to all report pages, allowing users to move quickly between report sections.
-* **Filter Icon**: Opens a dedicated filter panel containing all report slicers and filtering options in a single location, helping maximize report viewing space.
-* **Information Icon (!) **: Opens an information panel that provides a brief explanation of the current page, its purpose, and the meaning of the visualizations displayed, helping business users interpret the metrics correctly.
-
-These navigation elements were designed to create a more intuitive user experience, reduce navigation effort, and improve report accessibility for both technical and non-technical users.
-
-
-
-
-
-DAX Measures Documentation (README)
-Total Container Moves
-
-Counts all records in the container movement fact table. This measure represents the core operational throughput KPI used across the entire dashboard.
-
+```dax
 Total Container Moves = 
 COUNTROWS( 'fact container_movement' )
-Average Daily Moves
+```
 
-Calculates the average number of container moves per operating day by dividing total moves by the number of distinct movement dates.
+### Average Daily Moves
 
+Total moves divided by the number of distinct operating days.
+
+```dax
 Average Daily Moves = 
 DIVIDE(
     [Total Container Moves],
     DISTINCTCOUNT( 'fact container_movement'[move_start_date] ),
     0
 )
-Avg Crane Cycle Seconds
+```
 
-Calculates the average crane cycle time in seconds. Only valid movements where end time is greater than start time are included.
+---
 
+## 2. Crane & Operational Efficiency
+
+| Measure | Description |
+|---------|-------------|
+| **Avg Crane Cycle Seconds** | Average crane cycle time (seconds) |
+| **Moves 7-Day Rolling Avg** | Smooths daily fluctuations in activity |
+
+### Avg Crane Cycle Seconds
+
+Only includes valid movements where `move_end_time > move_start_time`.
+
+```dax
 Avg Crane Cycle Seconds = 
 VAR ValidMoves =
     FILTER(
@@ -87,10 +67,44 @@ DIVIDE(
     COUNTROWS( ValidMoves ),
     0
 )
-Avg Vessel Stay Hours
+```
 
-Calculates the average duration vessels stay in the terminal from ATA to ATD. Only valid and complete timestamps are included.
+### Moves 7-Day Rolling Avg
 
+```dax
+Moves 7-Day Rolling Avg = 
+DIVIDE(
+    CALCULATE(
+        [Total Container Moves],
+        DATESINPERIOD(
+            'dim date'[full_date],
+            MAX( 'dim date'[full_date] ),
+            -7,
+            DAY
+        )
+    ),
+    7,
+    0
+)
+```
+
+---
+
+## 3. Vessel & Berth Performance
+
+| Measure | Description |
+|---------|-------------|
+| **Avg Vessel Stay Hours** | Terminal stay duration (ATA to ATD) |
+| **Berth Delay Avg Hours** | Schedule adherence (ETA vs ATA) |
+| **Berth Occupancy %** | Berth utilization rate |
+| **Moves Variance** | Actual vs planned vessel moves |
+| **Moves YoY %** | Year-over-year growth (fiscal) |
+
+### Avg Vessel Stay Hours
+
+Filters for valid vessel calls with complete and logical timestamps.
+
+```dax
 Avg Vessel Stay Hours = 
 VAR ValidCalls =
     FILTER(
@@ -113,10 +127,13 @@ AVERAGEX(
         HOUR
     )
 )
-Berth Delay Avg Hours
+```
 
-Measures the average delay between ETA and ATA for vessels, indicating schedule adherence and port efficiency.
+### Berth Delay Avg Hours
 
+Average delay between Estimated Time of Arrival (ETA) and Actual Time of Arrival (ATA).
+
+```dax
 Berth Delay Avg Hours = 
 VAR ValidCalls =
     FILTER(
@@ -139,10 +156,14 @@ AVERAGEX(
         HOUR
     )
 )
-Berth Occupancy %
+```
 
-Calculates berth utilization by comparing total vessel berth days against total available berth capacity.
+### Berth Occupancy %
 
+Total vessel berth days ÷ (total available berths × period days).  
+*Note: `TotalBerths` is hardcoded as 10 — adjust per terminal configuration.*
+
+```dax
 Berth Occupancy % = 
 VAR TotalBerthDays =
     SUMX(
@@ -162,28 +183,73 @@ VAR PeriodDays =
 VAR TotalBerths = 10
 RETURN
     DIVIDE( TotalBerthDays, TotalBerths * PeriodDays, 0 )
-Moves 7-Day Rolling Avg
+```
 
-Calculates a rolling 7-day average of container moves to smooth daily fluctuations.
+### Moves Variance
 
-Moves 7-Day Rolling Avg = 
-DIVIDE(
+Actual moves minus planned moves per vessel.
+
+```dax
+Moves Variance = 
+SUMX(
+    'fact vessel_call',
+    'fact vessel_call'[total_moves_actual] -
+    'fact vessel_call'[total_moves_planned]
+)
+```
+
+### Moves YoY %
+
+Returns `BLANK()` when less than two years of data are available.
+
+```dax
+Moves YoY % = 
+VAR CurrentFiscalYear =
+    SELECTEDVALUE(
+        'dim date'[fiscal_year],
+        MAX( 'dim date'[fiscal_year] )
+    )
+VAR CurrentFiscalMonths =
+    CALCULATETABLE(
+        VALUES( 'dim date'[fiscal_month] ),
+        ALLSELECTED( 'dim date' )
+    )
+VAR CurrentMoves =
+    [Total Container Moves]
+VAR PreviousYearMoves =
     CALCULATE(
         [Total Container Moves],
-        DATESINPERIOD(
-            'dim date'[full_date],
-            MAX( 'dim date'[full_date] ),
-            -7,
-            DAY
+        FILTER(
+            ALL( 'dim date' ),
+            'dim date'[fiscal_year] = CurrentFiscalYear - 1
+                && 'dim date'[fiscal_month] IN CurrentFiscalMonths
         )
-    ),
-    7,
-    0
-)
-Avg Truck Turnaround Minutes
+    )
+RETURN
+    DIVIDE(
+        CurrentMoves - PreviousYearMoves,
+        PreviousYearMoves,
+        BLANK()
+    )
+```
 
-Calculates average truck time inside the terminal from gate-in to gate-out using valid transactions only.
+---
 
+## 4. Gate Performance
+
+| Measure / Column | Description |
+|------------------|-------------|
+| **Avg Truck Turnaround Minutes** | Average time from gate-in to gate-out |
+| **Gate Volume** | Total gate transactions |
+| **Gate-Ins Count** | Inbound gate transactions only |
+| **Gate-Outs Count** | Outbound gate transactions (inactive relationship) |
+| **Turnaround Bucket** | Categorical performance range (calculated column) |
+
+### Avg Truck Turnaround Minutes
+
+Uses `USERELATIONSHIP` to respect `gate_out_date` as the active date context.
+
+```dax
 Avg Truck Turnaround Minutes = 
 VAR ValidTransactions =
     FILTER(
@@ -217,25 +283,28 @@ CALCULATE(
         'dim date'[full_date]
     )
 )
-Gate Volume
+```
 
-Counts all gate transactions regardless of direction.
+### Gate Volume
 
+```dax
 Gate Volume = 
 COUNTROWS( 'fact gate_transaction' )
-Gate-Ins Count
+```
 
-Counts only inbound gate transactions.
+### Gate-Ins Count
 
+```dax
 Gate-Ins Count = 
 CALCULATE(
     COUNTROWS( 'fact gate_transaction' ),
     'fact gate_transaction'[direction] = "IN"
 )
-Gate-Outs Count
+```
 
-Counts outbound gate transactions using inactive relationship on gate-out date.
+### Gate-Outs Count
 
+```dax
 Gate-Outs Count = 
 CALCULATE(
     COUNTROWS( 'fact gate_transaction' ),
@@ -245,26 +314,26 @@ CALCULATE(
         'dim date'[full_date]
     )
 )
-Turnaround Bucket (Calculated Column)
+```
 
-Classifies truck turnaround time into operational performance ranges.
+### Turnaround Bucket (Calculated Column)
 
+Classifies truck turnaround time into operational ranges.
+
+```dax
 Turnaround Bucket = 
 VAR GateInDateTime =
     'fact gate_transaction'[gate_in_date]
         + 'fact gate_transaction'[gate_in_time]
-
 VAR GateOutDateTime =
     'fact gate_transaction'[gate_out_date]
         + 'fact gate_transaction'[gate_out_time]
-
 VAR Minutes =
     DATEDIFF(
         GateInDateTime,
         GateOutDateTime,
         MINUTE
     )
-
 RETURN
     SWITCH(
         TRUE(),
@@ -274,51 +343,41 @@ RETURN
         Minutes <= 90,  "60–90 min",
         "90+ min"
     )
-Moves Variance
+```
 
-Measures variance between actual and planned vessel moves.
+---
 
-Moves Variance = 
-SUMX(
-    'fact vessel_call',
-        'fact vessel_call'[total_moves_actual] -
-        'fact vessel_call'[total_moves_planned]
-)
-Moves YoY %
+## 5. Dashboard Structure (Quick Reference)
 
-Calculates year-over-year growth in container moves using fiscal year and fiscal month context.
+| Page | Focus Area |
+|------|-------------|
+| **Landing Page** | Home with page navigators |
+| **Operations Overview** | Container moves, crane cycles, berth occupancy, trends |
+| **Gate Performance** | Gate-in/out, truck turnaround, customer performance |
+| **Customer & Vessel Performance** | Top customers, YoY, vessel efficiency, SCD Type 2 |
 
-Important: This measure returns BLANK when there is less than 2 years of data available, because YoY comparison requires a previous fiscal year.
+### Persistent Navigation Icons
 
-Moves YoY % = 
-VAR CurrentFiscalYear =
-    SELECTEDVALUE(
-        'dim date'[fiscal_year],
-        MAX( 'dim date'[fiscal_year] )
-    )
+| Icon | Function |
+|------|----------|
+| 🏠 Home | Returns to Landing Page |
+| ☰ Menu | Opens page navigation panel |
+| 🔍 Filter | Opens centralized slicer panel |
+| ℹ️ Info | Shows page help and metric definitions |
 
-VAR CurrentFiscalMonths =
-    CALCULATETABLE(
-        VALUES( 'dim date'[fiscal_month] ),
-        ALLSELECTED( 'dim date' )
-    )
+---
 
-VAR CurrentMoves =
-    [Total Container Moves]
+## 6. Dependencies & Naming Conventions
 
-VAR PreviousYearMoves =
-    CALCULATE(
-        [Total Container Moves],
-        FILTER(
-            ALL( 'dim date' ),
-            'dim date'[fiscal_year] = CurrentFiscalYear - 1
-                && 'dim date'[fiscal_month] IN CurrentFiscalMonths
-        )
-    )
+- **Fact tables**  
+  - `fact container_movement`  
+  - `fact vessel_call`  
+  - `fact gate_transaction`
 
-RETURN
-    DIVIDE(
-        CurrentMoves - PreviousYearMoves,
-        PreviousYearMoves,
-        BLANK()
-    )
+- **Dimension table**  
+  - `dim date` (supports fiscal year/month, full_date)
+
+- **Inactive relationships used**  
+  - `gate_out_date` → `dim date[full_date]` (for `Gate-Outs Count` and `Avg Truck Turnaround Minutes`)
+
+> ⚠️ **Note**: `Berth Occupancy %` assumes exactly **10 berths**. Validate this against your terminal layout before production use.
