@@ -1,0 +1,368 @@
+
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+.schema-wrap{font-family:var(--font-sans);padding:1.5rem;background:var(--color-background-tertiary);border-radius:var(--border-radius-lg);min-width:900px}
+.section-label{font-size:11px;font-weight:500;letter-spacing:.08em;color:var(--color-text-tertiary);text-transform:uppercase;margin-bottom:.75rem;margin-top:1.5rem}
+.section-label:first-child{margin-top:0}
+.tables-row{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:1.5rem}
+.tbl{background:var(--color-background-primary);border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-md);overflow:hidden;min-width:160px;flex:1}
+.tbl-header{padding:7px 10px;font-size:12px;font-weight:500;display:flex;align-items:center;gap:6px;color:#fff}
+.tbl-name{font-weight:600;font-size:12px}
+.badge{font-size:9px;padding:2px 5px;border-radius:3px;font-weight:600;letter-spacing:.04em;color:#fff;opacity:.85}
+.tbl-body{padding:6px 0}
+.col-row{display:flex;align-items:center;gap:5px;padding:2px 10px;font-size:11px;color:var(--color-text-secondary)}
+.tag{font-size:9px;padding:1px 4px;border-radius:3px;font-weight:700;min-width:24px;text-align:center;flex-shrink:0}
+.tag-pk{background:#7B3FA0;color:#fff}
+.tag-fk{background:#a03d1e;color:#fff}
+.tag-src{background:#1e8c5f;color:#fff}
+.col-name{font-size:11px;color:var(--color-text-secondary)}
+.divider{border:none;border-top:0.5px solid var(--color-border-tertiary);margin:4px 0}
+.dim-confirmed .tbl-header{background:#1a3c5e}
+.dim-green .tbl-header{background:#1a5e4a}
+.fact-movement .tbl-header{background:#8B4513}
+.fact-vessel .tbl-header{background:#6B3A8B}
+.fact-gate .tbl-header{background:#2E6B8B}
+.section-sep{height:1px;background:var(--color-border-tertiary);margin:1.5rem 0}
+</style>
+<div class="schema-wrap">
+  <h2 class="sr-only" style="position:absolute;width:1px;height:1px;overflow:hidden">PortOps star schema using full_date as join key instead of surrogate date_key</h2>
+
+  <div class="section-label">confirmed dimensions — shared across all 3 facts</div>
+  <div class="tables-row">
+
+    <div class="tbl dim-confirmed">
+      <div class="tbl-header"><span class="tbl-name">dim_date</span><span class="badge">confirmed</span></div>
+      <div class="tbl-body">
+        <div class="col-row"><span class="tag tag-pk">PK</span><span class="col-name" style="color:var(--color-text-info)">full_date</span></div>
+        <div class="col-row"><span class="col-name">day_of_week</span></div>
+        <div class="col-row"><span class="col-name">day_name</span></div>
+        <div class="col-row"><span class="col-name">week_number</span></div>
+        <div class="col-row"><span class="col-name">month_number</span></div>
+        <div class="col-row"><span class="col-name">month_name</span></div>
+        <div class="col-row"><span class="col-name">quarter</span></div>
+        <div class="col-row"><span class="col-name">year</span></div>
+        <div class="col-row"><span class="col-name">is_weekend</span></div>
+        <div class="col-row"><span class="col-name">is_holiday</span></div>
+      </div>
+    </div>
+
+    <div class="tbl dim-confirmed">
+      <div class="tbl-header"><span class="tbl-name">dim_customer</span><span class="badge">confirmed</span></div>
+      <div class="tbl-body">
+        <div class="col-row"><span class="tag tag-pk">PK</span><span class="col-name" style="color:var(--color-text-info)">customer_key</span></div>
+        <div class="col-row"><span class="tag tag-src">SRC</span><span class="col-name">customer_id</span></div>
+        <div class="col-row"><span class="col-name">customer_code</span></div>
+        <div class="col-row"><span class="col-name">customer_name</span></div>
+        <div class="col-row"><span class="col-name">country</span></div>
+        <div class="col-row"><span class="col-name">customer_tier</span></div>
+        <div class="col-row"><span class="col-name">credit_limit</span></div>
+        <div class="col-row"><span class="col-name">active_flag</span></div>
+        <div class="col-row"><span class="col-name">onboarded_date</span></div>
+        <div class="col-row"><span class="col-name">effective_from</span></div>
+        <div class="col-row"><span class="col-name">effective_to</span></div>
+        <div class="col-row"><span class="col-name">change_reason</span></div>
+      </div>
+    </div>
+
+    <div class="tbl dim-confirmed">
+      <div class="tbl-header"><span class="tbl-name">dim_terminal</span><span class="badge">confirmed</span></div>
+      <div class="tbl-body">
+        <div class="col-row"><span class="tag tag-pk">PK</span><span class="col-name" style="color:var(--color-text-info)">terminal_key</span></div>
+        <div class="col-row"><span class="tag tag-src">SRC</span><span class="col-name">terminal_id</span></div>
+        <div class="col-row"><span class="col-name">terminal_code</span></div>
+        <div class="col-row"><span class="col-name">terminal_name</span></div>
+        <div class="col-row"><span class="col-name">zone</span></div>
+        <div class="col-row"><span class="col-name">terminal_type</span></div>
+      </div>
+    </div>
+
+    <div class="tbl dim-confirmed">
+      <div class="tbl-header"><span class="tbl-name">dim_equipment</span><span class="badge">confirmed</span></div>
+      <div class="tbl-body">
+        <div class="col-row"><span class="tag tag-pk">PK</span><span class="col-name" style="color:var(--color-text-info)">equipment_key</span></div>
+        <div class="col-row"><span class="tag tag-src">SRC</span><span class="col-name">equipment_id</span></div>
+        <div class="col-row"><span class="col-name">equipment_code</span></div>
+        <div class="col-row"><span class="col-name">equipment_type</span></div>
+        <div class="col-row"><span class="col-name">terminal_id</span></div>
+        <div class="col-row"><span class="col-name">capacity_tons</span></div>
+        <div class="col-row"><span class="col-name">acquired_date</span></div>
+        <div class="col-row"><span class="col-name">status</span></div>
+      </div>
+    </div>
+
+    <div class="tbl dim-green">
+      <div class="tbl-header"><span class="tbl-name">dim_shift</span><span class="badge">confirmed</span></div>
+      <div class="tbl-body">
+        <div class="col-row"><span class="tag tag-pk">PK</span><span class="col-name" style="color:var(--color-text-info)">shift_key</span></div>
+        <div class="col-row"><span class="tag tag-src">SRC</span><span class="col-name">shift_id</span></div>
+        <div class="col-row"><span class="col-name">shift_code</span></div>
+        <div class="col-row"><span class="col-name">shift_name</span></div>
+        <div class="col-row"><span class="col-name">start_time</span></div>
+        <div class="col-row"><span class="col-name">end_time</span></div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="section-sep"></div>
+
+  <!-- FACT 1 -->
+  <div class="section-label">fact 1 — container movement</div>
+  <div class="tables-row">
+    <div class="tbl fact-movement" style="max-width:185px">
+      <div class="tbl-header"><span class="tbl-name">fact_container_movement</span></div>
+      <div class="tbl-body">
+        <div class="col-row"><span class="tag tag-pk">PK</span><span class="col-name" style="color:var(--color-text-info)">movement_sk</span></div>
+        <div class="col-row"><span class="tag tag-fk">FK</span><span class="col-name">full_date</span></div>
+        <div class="col-row"><span class="tag tag-fk">FK</span><span class="col-name">customer_key</span></div>
+        <div class="col-row"><span class="tag tag-fk">FK</span><span class="col-name">terminal_key</span></div>
+        <div class="col-row"><span class="tag tag-fk">FK</span><span class="col-name">equipment_key</span></div>
+        <div class="col-row"><span class="tag tag-fk">FK</span><span class="col-name">shift_key</span></div>
+        <div class="col-row"><span class="tag tag-src">SRC</span><span class="col-name">movement_id</span></div>
+        <div class="col-row"><span class="col-name">vessel_call_id</span></div>
+        <div class="col-row"><span class="col-name">container_no</span></div>
+        <div class="col-row"><span class="col-name">container_size</span></div>
+        <div class="col-row"><span class="col-name">move_type</span></div>
+        <div class="col-row"><span class="col-name">move_start_time</span></div>
+        <div class="col-row"><span class="col-name">move_end_time</span></div>
+        <div class="col-row"><span class="col-name">is_reefer</span></div>
+        <div class="col-row"><span class="col-name">weight_tons</span></div>
+      </div>
+    </div>
+
+    <div class="tbl dim-confirmed">
+      <div class="tbl-header"><span class="tbl-name">dim_date</span><span class="badge">confirmed</span></div>
+      <div class="tbl-body">
+        <div class="col-row"><span class="tag tag-pk">PK</span><span class="col-name" style="color:var(--color-text-info)">full_date</span></div>
+        <div class="col-row"><span class="col-name">day_of_week</span></div>
+        <div class="col-row"><span class="col-name">day_name</span></div>
+        <div class="col-row"><span class="col-name">week_number</span></div>
+        <div class="col-row"><span class="col-name">month_number</span></div>
+        <div class="col-row"><span class="col-name">month_name</span></div>
+        <div class="col-row"><span class="col-name">quarter</span></div>
+        <div class="col-row"><span class="col-name">year</span></div>
+        <div class="col-row"><span class="col-name">is_weekend</span></div>
+        <div class="col-row"><span class="col-name">is_holiday</span></div>
+      </div>
+    </div>
+
+    <div class="tbl dim-confirmed">
+      <div class="tbl-header"><span class="tbl-name">dim_customer</span><span class="badge">confirmed</span></div>
+      <div class="tbl-body">
+        <div class="col-row"><span class="tag tag-pk">PK</span><span class="col-name" style="color:var(--color-text-info)">customer_key</span></div>
+        <div class="col-row"><span class="tag tag-src">SRC</span><span class="col-name">customer_id</span></div>
+        <div class="col-row"><span class="col-name">customer_code</span></div>
+        <div class="col-row"><span class="col-name">customer_name</span></div>
+        <div class="col-row"><span class="col-name">customer_tier</span></div>
+        <div class="col-row"><span class="col-name">credit_limit</span></div>
+        <div class="col-row"><span class="col-name">active_flag</span></div>
+        <div class="col-row"><span class="col-name">onboarded_date</span></div>
+        <div class="col-row"><span class="col-name">effective_from</span></div>
+        <div class="col-row"><span class="col-name">effective_to</span></div>
+        <div class="col-row"><span class="col-name">change_reason</span></div>
+      </div>
+    </div>
+
+    <div class="tbl dim-confirmed">
+      <div class="tbl-header"><span class="tbl-name">dim_terminal</span><span class="badge">confirmed</span></div>
+      <div class="tbl-body">
+        <div class="col-row"><span class="tag tag-pk">PK</span><span class="col-name" style="color:var(--color-text-info)">terminal_key</span></div>
+        <div class="col-row"><span class="tag tag-src">SRC</span><span class="col-name">terminal_id</span></div>
+        <div class="col-row"><span class="col-name">terminal_code</span></div>
+        <div class="col-row"><span class="col-name">terminal_name</span></div>
+        <div class="col-row"><span class="col-name">zone</span></div>
+        <div class="col-row"><span class="col-name">terminal_type</span></div>
+      </div>
+    </div>
+
+    <div class="tbl dim-confirmed">
+      <div class="tbl-header"><span class="tbl-name">dim_equipment</span><span class="badge">confirmed</span></div>
+      <div class="tbl-body">
+        <div class="col-row"><span class="tag tag-pk">PK</span><span class="col-name" style="color:var(--color-text-info)">equipment_key</span></div>
+        <div class="col-row"><span class="tag tag-src">SRC</span><span class="col-name">equipment_id</span></div>
+        <div class="col-row"><span class="col-name">equipment_code</span></div>
+        <div class="col-row"><span class="col-name">equipment_type</span></div>
+        <div class="col-row"><span class="col-name">capacity_tons</span></div>
+        <div class="col-row"><span class="col-name">acquired_date</span></div>
+        <div class="col-row"><span class="col-name">status</span></div>
+      </div>
+    </div>
+
+    <div class="tbl dim-green">
+      <div class="tbl-header"><span class="tbl-name">dim_shift</span><span class="badge">confirmed</span></div>
+      <div class="tbl-body">
+        <div class="col-row"><span class="tag tag-pk">PK</span><span class="col-name" style="color:var(--color-text-info)">shift_key</span></div>
+        <div class="col-row"><span class="tag tag-src">SRC</span><span class="col-name">shift_id</span></div>
+        <div class="col-row"><span class="col-name">shift_code</span></div>
+        <div class="col-row"><span class="col-name">shift_name</span></div>
+        <div class="col-row"><span class="col-name">start_time</span></div>
+        <div class="col-row"><span class="col-name">end_time</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section-sep"></div>
+
+  <!-- FACT 2 -->
+  <div class="section-label">fact 2 — vessel call</div>
+  <div class="tables-row">
+    <div class="tbl fact-vessel" style="max-width:190px">
+      <div class="tbl-header"><span class="tbl-name">fact_vessel_call</span></div>
+      <div class="tbl-body">
+        <div class="col-row"><span class="tag tag-pk">PK</span><span class="col-name" style="color:var(--color-text-info)">vessel_call_sk</span></div>
+        <div class="col-row"><span class="tag tag-fk">FK</span><span class="col-name">eta_date</span></div>
+        <div class="col-row"><span class="tag tag-fk">FK</span><span class="col-name">ata_date</span></div>
+        <div class="col-row"><span class="tag tag-fk">FK</span><span class="col-name">atd_date</span></div>
+        <div class="col-row"><span class="tag tag-fk">FK</span><span class="col-name">customer_key</span></div>
+        <div class="col-row"><span class="tag tag-fk">FK</span><span class="col-name">terminal_key</span></div>
+        <div class="col-row"><span class="tag tag-src">SRC</span><span class="col-name">vessel_call_id</span></div>
+        <div class="col-row"><span class="col-name">vessel_name</span></div>
+        <div class="col-row"><span class="col-name">voyage_no</span></div>
+        <div class="col-row"><span class="col-name">total_moves_planned</span></div>
+        <div class="col-row"><span class="col-name">total_moves_actual</span></div>
+        <div class="col-row"><span class="col-name">status</span></div>
+      </div>
+    </div>
+
+    <div class="tbl dim-confirmed" style="border:2px dashed #6B3A8B">
+      <div class="tbl-header"><span class="tbl-name">dim_date</span><span class="badge">confirmed</span></div>
+      <div class="tbl-body">
+        <div style="padding:3px 10px;font-size:10px;color:var(--color-text-tertiary);font-style:italic">3 role-playing FKs:</div>
+        <div class="col-row" style="gap:3px"><span style="font-size:9px;background:#6B3A8B;color:#fff;padding:1px 4px;border-radius:2px">ETA</span><span class="col-name">eta_date</span></div>
+        <div class="col-row" style="gap:3px"><span style="font-size:9px;background:#6B3A8B;color:#fff;padding:1px 4px;border-radius:2px">ATA</span><span class="col-name">ata_date</span></div>
+        <div class="col-row" style="gap:3px"><span style="font-size:9px;background:#6B3A8B;color:#fff;padding:1px 4px;border-radius:2px">ATD</span><span class="col-name">atd_date</span></div>
+        <hr class="divider">
+        <div class="col-row"><span class="tag tag-pk">PK</span><span class="col-name" style="color:var(--color-text-info)">full_date</span></div>
+        <div class="col-row"><span class="col-name">day_of_week</span></div>
+        <div class="col-row"><span class="col-name">day_name</span></div>
+        <div class="col-row"><span class="col-name">week_number</span></div>
+        <div class="col-row"><span class="col-name">month_number</span></div>
+        <div class="col-row"><span class="col-name">month_name</span></div>
+        <div class="col-row"><span class="col-name">quarter</span></div>
+        <div class="col-row"><span class="col-name">year</span></div>
+        <div class="col-row"><span class="col-name">is_weekend</span></div>
+        <div class="col-row"><span class="col-name">is_holiday</span></div>
+      </div>
+    </div>
+
+    <div class="tbl dim-confirmed">
+      <div class="tbl-header"><span class="tbl-name">dim_customer</span><span class="badge">confirmed</span></div>
+      <div class="tbl-body">
+        <div class="col-row"><span class="tag tag-pk">PK</span><span class="col-name" style="color:var(--color-text-info)">customer_key</span></div>
+        <div class="col-row"><span class="tag tag-src">SRC</span><span class="col-name">customer_id</span></div>
+        <div class="col-row"><span class="col-name">customer_code</span></div>
+        <div class="col-row"><span class="col-name">customer_name</span></div>
+        <div class="col-row"><span class="col-name">customer_tier</span></div>
+        <div class="col-row"><span class="col-name">credit_limit</span></div>
+        <div class="col-row"><span class="col-name">active_flag</span></div>
+        <div class="col-row"><span class="col-name">onboarded_date</span></div>
+        <div class="col-row"><span class="col-name">effective_from</span></div>
+        <div class="col-row"><span class="col-name">effective_to</span></div>
+        <div class="col-row"><span class="col-name">change_reason</span></div>
+      </div>
+    </div>
+
+    <div class="tbl dim-confirmed">
+      <div class="tbl-header"><span class="tbl-name">dim_terminal</span><span class="badge">confirmed</span></div>
+      <div class="tbl-body">
+        <div class="col-row"><span class="tag tag-pk">PK</span><span class="col-name" style="color:var(--color-text-info)">terminal_key</span></div>
+        <div class="col-row"><span class="tag tag-src">SRC</span><span class="col-name">terminal_id</span></div>
+        <div class="col-row"><span class="col-name">terminal_code</span></div>
+        <div class="col-row"><span class="col-name">terminal_name</span></div>
+        <div class="col-row"><span class="col-name">zone</span></div>
+        <div class="col-row"><span class="col-name">terminal_type</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section-sep"></div>
+
+  <!-- FACT 3 -->
+  <div class="section-label">fact 3 — gate transaction</div>
+  <div class="tables-row">
+    <div class="tbl fact-gate" style="max-width:190px">
+      <div class="tbl-header"><span class="tbl-name">fact_gate_transaction</span></div>
+      <div class="tbl-body">
+        <div class="col-row"><span class="tag tag-pk">PK</span><span class="col-name" style="color:var(--color-text-info)">gate_txn_sk</span></div>
+        <div class="col-row"><span class="tag tag-fk">FK</span><span class="col-name">gate_in_date</span></div>
+        <div class="col-row"><span class="tag tag-fk">FK</span><span class="col-name">gate_out_date</span></div>
+        <div class="col-row"><span class="tag tag-fk">FK</span><span class="col-name">customer_key</span></div>
+        <div class="col-row"><span class="tag tag-fk">FK</span><span class="col-name">terminal_key</span></div>
+        <div class="col-row"><span class="tag tag-fk">FK</span><span class="col-name">shift_key</span></div>
+        <div class="col-row"><span class="tag tag-src">SRC</span><span class="col-name">gate_txn_id</span></div>
+        <div class="col-row"><span class="col-name">truck_plate</span></div>
+        <div class="col-row"><span class="col-name">container_no</span></div>
+        <div class="col-row"><span class="col-name">direction</span></div>
+        <div class="col-row"><span class="col-name">gate_in_time</span></div>
+        <div class="col-row"><span class="col-name">gate_out_time</span></div>
+      </div>
+    </div>
+
+    <div class="tbl dim-confirmed" style="border:2px dashed #2E6B8B">
+      <div class="tbl-header"><span class="tbl-name">dim_date</span><span class="badge">confirmed</span></div>
+      <div class="tbl-body">
+        <div style="padding:3px 10px;font-size:10px;color:var(--color-text-tertiary);font-style:italic">2 role-playing FKs:</div>
+        <div class="col-row" style="gap:3px"><span style="font-size:9px;background:#2E6B8B;color:#fff;padding:1px 4px;border-radius:2px">IN</span><span class="col-name">gate_in_date</span></div>
+        <div class="col-row" style="gap:3px"><span style="font-size:9px;background:#2E6B8B;color:#fff;padding:1px 4px;border-radius:2px">OUT</span><span class="col-name">gate_out_date</span></div>
+        <hr class="divider">
+        <div class="col-row"><span class="tag tag-pk">PK</span><span class="col-name" style="color:var(--color-text-info)">full_date</span></div>
+        <div class="col-row"><span class="col-name">day_of_week</span></div>
+        <div class="col-row"><span class="col-name">week_number</span></div>
+        <div class="col-row"><span class="col-name">month_number</span></div>
+        <div class="col-row"><span class="col-name">month_name</span></div>
+        <div class="col-row"><span class="col-name">quarter</span></div>
+        <div class="col-row"><span class="col-name">year</span></div>
+        <div class="col-row"><span class="col-name">is_weekend</span></div>
+        <div class="col-row"><span class="col-name">is_holiday</span></div>
+      </div>
+    </div>
+
+    <div class="tbl dim-confirmed">
+      <div class="tbl-header"><span class="tbl-name">dim_customer</span><span class="badge">confirmed</span></div>
+      <div class="tbl-body">
+        <div class="col-row"><span class="tag tag-pk">PK</span><span class="col-name" style="color:var(--color-text-info)">customer_key</span></div>
+        <div class="col-row"><span class="tag tag-src">SRC</span><span class="col-name">customer_id</span></div>
+        <div class="col-row"><span class="col-name">customer_code</span></div>
+        <div class="col-row"><span class="col-name">customer_name</span></div>
+        <div class="col-row"><span class="col-name">customer_tier</span></div>
+        <div class="col-row"><span class="col-name">credit_limit</span></div>
+        <div class="col-row"><span class="col-name">active_flag</span></div>
+        <div class="col-row"><span class="col-name">onboarded_date</span></div>
+        <div class="col-row"><span class="col-name">effective_from</span></div>
+        <div class="col-row"><span class="col-name">effective_to</span></div>
+        <div class="col-row"><span class="col-name">change_reason</span></div>
+      </div>
+    </div>
+
+    <div class="tbl dim-confirmed">
+      <div class="tbl-header"><span class="tbl-name">dim_terminal</span><span class="badge">confirmed</span></div>
+      <div class="tbl-body">
+        <div class="col-row"><span class="tag tag-pk">PK</span><span class="col-name" style="color:var(--color-text-info)">terminal_key</span></div>
+        <div class="col-row"><span class="tag tag-src">SRC</span><span class="col-name">terminal_id</span></div>
+        <div class="col-row"><span class="col-name">terminal_code</span></div>
+        <div class="col-row"><span class="col-name">terminal_name</span></div>
+        <div class="col-row"><span class="col-name">zone</span></div>
+        <div class="col-row"><span class="col-name">terminal_type</span></div>
+      </div>
+    </div>
+
+    <div class="tbl dim-green">
+      <div class="tbl-header"><span class="tbl-name">dim_shift</span><span class="badge">confirmed</span></div>
+      <div class="tbl-body">
+        <div class="col-row"><span class="tag tag-pk">PK</span><span class="col-name" style="color:var(--color-text-info)">shift_key</span></div>
+        <div class="col-row"><span class="tag tag-src">SRC</span><span class="col-name">shift_id</span></div>
+        <div class="col-row"><span class="col-name">shift_code</span></div>
+        <div class="col-row"><span class="col-name">shift_name</span></div>
+        <div class="col-row"><span class="col-name">start_time</span></div>
+        <div class="col-row"><span class="col-name">end_time</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div style="display:flex;gap:16px;flex-wrap:wrap;margin-top:1rem;padding-top:.75rem;border-top:0.5px solid var(--color-border-tertiary)">
+    <div style="display:flex;align-items:center;gap:5px;font-size:11px;color:var(--color-text-secondary)"><span class="tag tag-pk">PK</span> primary key</div>
+    <div style="display:flex;align-items:center;gap:5px;font-size:11px;color:var(--color-text-secondary)"><span class="tag tag-fk">FK</span> foreign key</div>
+    <div style="display:flex;align-items:center;gap:5px;font-size:11px;color:var(--color-text-secondary)"><span class="tag tag-src">SRC</span> source / natural key</div>
+    <div style="display:flex;align-items:center;gap:5px;font-size:11px;color:var(--color-text-secondary)"><span style="display:inline-block;width:16px;height:12px;border:2px dashed #555;border-radius:2px"></span> role-playing dimension</div>
+  </div>
+</div>

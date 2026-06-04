@@ -1,0 +1,5 @@
+terminal_id,terminal_code,terminal_name,zone,terminal_type
+1,T1,Terminal 1 - North Berth,North,Deep-Water
+2,T2,Terminal 2 - South Berth,South,Deep-Water
+3,T3,Terminal 3 - Feeder,East,Feeder
+4,T4,Terminal 4 - RoRo,West,RoRo

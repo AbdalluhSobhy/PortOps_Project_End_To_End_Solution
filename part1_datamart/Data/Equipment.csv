@@ -1,0 +1,13 @@
+equipment_id,equipment_code,equipment_type,terminal_id,capacity_tons,acquired_date,status
+1,STS-01,Ship-to-Shore Crane,1,65,2018-03-10,Active
+2,STS-02,Ship-to-Shore Crane,1,65,2018-03-10,Active
+3,STS-03,Ship-to-Shore Crane,2,85,2021-06-01,Active
+4,STS-04,Ship-to-Shore Crane,2,85,2021-06-01,Active
+5,RTG-01,Rubber-Tyred Gantry,1,40,2019-01-15,Active
+6,RTG-02,Rubber-Tyred Gantry,1,40,2019-01-15,Active
+7,RTG-03,Rubber-Tyred Gantry,2,40,2020-04-05,Active
+8,RTG-04,Rubber-Tyred Gantry,2,40,2020-04-05,Active
+9,RS-01,Reach Stacker,3,45,2017-09-20,Active
+10,RS-02,Reach Stacker,3,45,2017-09-20,Maintenance
+11,TT-01,Terminal Tractor,1,30,2022-02-01,Active
+12,TT-02,Terminal Tractor,2,30,2022-02-01,Active

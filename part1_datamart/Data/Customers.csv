@@ -1,0 +1,13 @@
+customer_id,customer_code,customer_name,country,customer_tier,credit_limit,active_flag,onboarded_date
+1,MSK,Maersk Line,DK,Platinum,5000000,1,2020-02-11
+2,MSC,Mediterranean Shipping Co,CH,Platinum,4500000,1,2020-09-17
+3,CMA,CMA CGM,FR,Platinum,3800000,1,2020-11-28
+4,HPL,Hapag-Lloyd  ,DE,Gold,2500000,1,2020-02-08
+5,ONE,Ocean Network Express,JP,Gold,2200000,1,2020-10-20
+6,EVE,Evergreen Marine,TW,Gold,2000000,1,2020-09-14
+7,COS,COSCO Shipping Lines,CN,Gold,2800000,1,2020-10-18
+8,ZIM,ZIM Integrated Shipping,IL,Bronze,800000,1,2020-12-25
+9,YML,Yang Ming Marine,TW,Silver,1000000,1,2020-08-25
+10,HMM,HMM Co,KR,Silver,1500000,1,2020-10-15
+11,OOCL,OOCL,HK,Silver,1100000,1,2020-04-01
+12,WHL,Wan Hai Lines,TW,Bronze,600000,1,2020-10-03
