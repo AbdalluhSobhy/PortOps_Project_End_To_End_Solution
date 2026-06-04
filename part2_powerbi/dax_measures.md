@@ -1,6 +1,6 @@
 # Power BI DAX Measures Documentation
 
-This document provides a complete reference for all DAX calculations used in the Terminal Operations Dashboard. Measures are organized by functional area for easier maintenance and onboarding.
+This document provides a complete reference for all DAX calculations used in the Terminal Operations Dashboard. Measures are organized by functional area.
 
 ---
 
@@ -367,17 +367,3 @@ RETURN
 
 ---
 
-## 6. Dependencies & Naming Conventions
-
-- **Fact tables**  
-  - `fact container_movement`  
-  - `fact vessel_call`  
-  - `fact gate_transaction`
-
-- **Dimension table**  
-  - `dim date` (supports fiscal year/month, full_date)
-
-- **Inactive relationships used**  
-  - `gate_out_date` → `dim date[full_date]` (for `Gate-Outs Count` and `Avg Truck Turnaround Minutes`)
-
-> ⚠️ **Note**: `Berth Occupancy %` assumes exactly **10 berths**. Validate this against your terminal layout before production use.
